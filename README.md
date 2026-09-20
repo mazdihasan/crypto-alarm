@@ -71,10 +71,21 @@ The mobile application is built with Expo and React Native.
    ```bash
    npm install
    ```
-3. Update Backend URL (Optional depending on your setup):
+3. Firebase Configuration (Client App):
+   - For push notifications to work on the device, you need the client configuration from Firebase.
+   - Go to your [Firebase Console](https://console.firebase.google.com/).
+   - Select your project -> **Project Settings** (the gear icon) -> **General**.
+   - Under "Your apps", download the **`google-services.json`** file for Android (and `GoogleService-Info.plist` if building for iOS).
+   - Place this file directly in the `cryptoalarm/` directory.
+4. Update Backend URL (Optional depending on your setup):
    - In `cryptoalarm/src/utils/api.ts`, update the `BASE_URL` to point to your backend server IP if running on a physical device or a separate emulator network. (e.g. `http://192.168.x.x:3000/api`)
-4. Start the Expo Development Server:
-   ```bash
-   npx expo start
-   ```
-5. Scan the QR code using the Expo Go app on your phone, or press `a` / `i` to open in an emulator.
+5. Build and Run the App:
+   - **Important**: This app uses custom native modules (`@react-native-firebase` and `@notifee`), so it **cannot** be run in the standard "Expo Go" app. You must build a custom development client.
+   - For Android (requires Android Studio / Emulator):
+     ```bash
+     npm run android
+     ```
+   - For iOS (requires Mac / Xcode):
+     ```bash
+     npm run ios
+     ```
