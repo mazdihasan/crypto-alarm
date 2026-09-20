@@ -33,8 +33,14 @@ The backend is built with Node.js, Express, and Prisma. It runs a background wor
      cp .env-example .env
      ```
    - Customize your `SUPPORTED_SYMBOLS` in `.env` if desired.
-4. Firebase Configuration:
-   - Place your Firebase service account JSON file in the `backend` directory and name it exactly `crypto-alarm-firebase-admin.json`.
+4. Firebase Configuration (Push Notifications):
+   - You need a Firebase Service Account key to allow the backend to send push notifications.
+   - Go to your [Firebase Console](https://console.firebase.google.com/).
+   - Select your project -> **Project Settings** (the gear icon) -> **Service accounts**.
+   - Click **Generate new private key**.
+   - A JSON file will be downloaded to your computer.
+   - Rename this downloaded file to **`crypto-alarm-firebase-admin.json`**.
+   - Move it into the `backend/` directory of this project.
 5. Database Setup (Prisma & SQLite):
    - Push the schema to the database:
      ```bash
