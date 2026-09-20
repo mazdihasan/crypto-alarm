@@ -1,0 +1,21 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Alarm {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  deviceToken String
+  symbol      String
+  condition   String   // Will be '>=' or '<='
+  price       Float
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}

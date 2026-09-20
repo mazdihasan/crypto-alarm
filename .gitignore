@@ -1,0 +1,38 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Expo / React Native
+.expo/
+dist/
+npm-debug.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+web-build/
+
+# Environment Variables
+.env
+.env.local
+
+# Firebase / Secrets
+crypto-alarm-firebase-admin.json
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+.DS_Store
+.claude/
+.cursor/
+.devin/
+.agents/
+
+# SQLite
+*.db
+*.db-journal
+backend/prisma/*.db

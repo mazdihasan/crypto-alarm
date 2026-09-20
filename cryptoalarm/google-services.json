@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795823151597",
+    "project_id": "crypto-alarm-df861",
+    "storage_bucket": "crypto-alarm-df861.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795823151597:android:1144bc9d26afe3b9242fe4",
+        "android_client_info": {
+          "package_name": "dev.mazdi.cryptoalarm"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBBuD9O7zBezVjgOJKzzBaAWIJwxjj9pBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
