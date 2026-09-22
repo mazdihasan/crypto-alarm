@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Vibration } from 'react-native';
 import Sound from 'react-native-sound';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -18,6 +18,9 @@ export default function AlarmScreen() {
     // Start pulsing animation
     pulseAnim.value = withRepeat(withTiming(1.2, { duration: 500 }), -1, true);
 
+    // Vibrate phone continuously like an alarm clock: vibrate 800ms, pause 400ms
+    Vibration.vibrate([800, 400], true);
+
     Sound.setCategory('Playback', true); // true = mixWithOthers off, plays over silent mode
     // On Android, files in res/raw/ use null as the base path (not Sound.MAIN_BUNDLE)
     const alarmSound = new Sound('alarm.mp3', null as any, (error) => {
@@ -25,7 +28,7 @@ export default function AlarmScreen() {
         console.error('Error loading alarm sound:', error);
         return;
       }
-      alarmSound.setNumberOfLoops(-1); // loop indefinitely
+      alarmSound.setNumberOfLoops(-1); // loop indefinitely like a real clock alarm
       alarmSound.setVolume(1.0);
       alarmSound.play((success) => {
         if (!success) console.error('Alarm sound playback failed');
@@ -34,12 +37,14 @@ export default function AlarmScreen() {
     });
 
     return () => {
+      Vibration.cancel();
       alarmSound.stop();
       alarmSound.release();
     };
   }, []);
 
   const handleStop = async () => {
+    Vibration.cancel();
     if (sound) {
       sound.stop();
       sound.release();

@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TextInput, TouchableOpacity,
   FlatList, ActivityIndicator, Alert, ScrollView,
   Modal, Animated, Dimensions, KeyboardAvoidingView,
-  Platform, Pressable,
+  Platform, Pressable, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GlassCard } from '../components/GlassCard';
@@ -11,10 +11,86 @@ import { getOrCreateUserId } from '../utils/user';
 import { requestUserPermission, getDeviceToken } from '../utils/push';
 import { getAlarms, createAlarm, deleteAlarm, getSymbols, getNotice, registerDevice } from '../utils/api';
 import { getMessaging, onMessage } from '@react-native-firebase/messaging';
+import { useRouter } from 'expo-router';
 import axios from 'axios';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const BINANCE_URL = 'https://api.binance.com/api/v3/ticker/price?symbols=';
+
+// ─── HTML & Link Formatter for Sticky Notice ──────────────────────────────────
+function renderFormattedNotice(raw: string | null) {
+  if (!raw) return null;
+
+  // Normalize markdown links [text](url) to HTML <a href="url">text</a> and <br> to newline
+  const processed = raw
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/<br\s*\/?>/gi, '\n');
+
+  // Tokenize by <a>, <b>, and <strong> tags
+  const tagRegex = /(<a\s+(?:[^>]*?\s+)?href=["']([^"']*)["'][^>]*>(.*?)<\/a>)|(<b>(.*?)<\/b>)|(<strong>(.*?)<\/strong>)/gi;
+
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  const decodeEntities = (str: string) =>
+    str
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, ' ');
+
+  while ((match = tagRegex.exec(processed)) !== null) {
+    if (match.index > lastIndex) {
+      nodes.push(decodeEntities(processed.substring(lastIndex, match.index)));
+    }
+
+    if (match[1]) {
+      // <a> tag
+      const href = match[2]?.trim();
+      const linkText = decodeEntities(match[3] || href);
+      nodes.push(
+        <Text
+          key={`link-${match.index}`}
+          style={s.noticeLink}
+          onPress={() => {
+            if (href) {
+              Linking.openURL(href).catch(() => {
+                Alert.alert('Unable to open link', href);
+              });
+            }
+          }}
+        >
+          {linkText}
+        </Text>
+      );
+    } else if (match[4]) {
+      // <b> tag
+      nodes.push(
+        <Text key={`b-${match.index}`} style={s.noticeBold}>
+          {decodeEntities(match[5])}
+        </Text>
+      );
+    } else if (match[6]) {
+      // <strong> tag
+      nodes.push(
+        <Text key={`strong-${match.index}`} style={s.noticeBold}>
+          {decodeEntities(match[7])}
+        </Text>
+      );
+    }
+
+    lastIndex = tagRegex.lastIndex;
+  }
+
+  if (lastIndex < processed.length) {
+    nodes.push(decodeEntities(processed.substring(lastIndex)));
+  }
+
+  return nodes;
+}
 
 // ─── Dropdown Component ────────────────────────────────────────────────────────
 function Dropdown({
@@ -48,6 +124,7 @@ function Dropdown({
 
 // ─── Main Screen ───────────────────────────────────────────────────────────────
 export default function Home() {
+  const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [deviceToken, setDeviceToken] = useState<string | null>(null);
   const [alarms, setAlarms] = useState<any[]>([]);
@@ -103,6 +180,13 @@ export default function Home() {
 
       const msg = getMessaging();
       const unsubscribe = onMessage(msg, async remoteMessage => {
+        if (remoteMessage.data?.type === 'alarm') {
+          router.push({
+            pathname: '/alarm',
+            params: { symbol: String(remoteMessage.data?.symbol || '') },
+          });
+          return;
+        }
         const title = String(remoteMessage.notification?.title || remoteMessage.data?.title || 'Alert');
         const body = String(remoteMessage.notification?.body || remoteMessage.data?.body || 'New message received.');
         Alert.alert(title, body);
@@ -286,7 +370,7 @@ export default function Home() {
             </View>
             <View style={s.noticeContent}>
               <Text style={s.noticeHeader}>ANNOUNCEMENT</Text>
-              <Text style={s.noticeBody} numberOfLines={3}>{notice}</Text>
+              <Text style={s.noticeBody} numberOfLines={4}>{renderFormattedNotice(notice)}</Text>
             </View>
           </View>
           <TouchableOpacity
@@ -507,6 +591,15 @@ const s = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     lineHeight: 18,
+  },
+  noticeLink: {
+    color: '#38BDF8',
+    fontWeight: '700',
+    textDecorationLine: 'underline',
+  },
+  noticeBold: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
   noticeCloseBtn: {
     width: 28,

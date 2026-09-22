@@ -21,12 +21,19 @@ Updates the notice banner displayed at the bottom of all user devices. The app a
 }
 ```
 
-### Example (cURL):
+### Example with HTML Link:
+You can use standard HTML links `<a href="...">text</a>`, bold `<b>`, or line breaks `<br>`:
+
 ```bash
 curl -X POST https://cryptoalarm-server.mazdi.dev/api/notice \
   -H "Content-Type: application/json" \
-  -d "{\"text\": \"🚨 Bitcoin surges past $90,000!\", \"secret\": \"changeme_use_a_secure_password_here\"}"
+  -d '{
+    "text": "Join our official <a href=\"https://t.me/yourchannel\">Telegram Group</a> for live signals!",
+    "secret": "changeme_use_a_secure_password_here"
+  }'
 ```
+
+*(Markdown links like `[Telegram Group](https://t.me/yourchannel)` and `<b>bold</b>` tags are also supported!)*
 
 ---
 

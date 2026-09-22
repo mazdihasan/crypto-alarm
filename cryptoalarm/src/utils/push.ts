@@ -1,10 +1,10 @@
 import { Platform, PermissionsAndroid } from 'react-native';
-import { 
-  getMessaging, 
-  getToken, 
-  requestPermission, 
-  AuthorizationStatus, 
-  registerDeviceForRemoteMessages 
+import {
+  getMessaging,
+  getToken,
+  requestPermission,
+  AuthorizationStatus,
+  registerDeviceForRemoteMessages
 } from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, AndroidCategory } from '@notifee/react-native';
 
@@ -46,10 +46,10 @@ export async function requestUserPermission() {
           return false;
         }
       }
-      
+
       // Request Notifee permissions for alarms
       await notifee.requestPermission();
-      
+
       return true;
     } else {
       const msg = getMessaging();
@@ -72,12 +72,12 @@ export async function requestUserPermission() {
 export async function getDeviceToken(): Promise<string | null> {
   try {
     const msg = getMessaging();
-    
+
     // Register the device with FCM (iOS only)
     if (Platform.OS === 'ios') {
       await registerDeviceForRemoteMessages(msg);
     }
-    
+
     const token = await getToken(msg);
     return token;
   } catch (error) {
