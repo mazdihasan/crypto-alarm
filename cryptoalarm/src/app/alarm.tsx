@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { Audio } from 'expo-av';
+import Sound from 'react-native-sound';
+
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import notifee from '@notifee/react-native';
 import Animated, { withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
@@ -10,48 +11,38 @@ const { width } = Dimensions.get('window');
 export default function AlarmScreen() {
   const router = useRouter();
   const { symbol } = useLocalSearchParams();
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [sound, setSound] = useState<Sound | null>(null);
   const pulseAnim = useSharedValue(1);
 
   useEffect(() => {
     // Start pulsing animation
     pulseAnim.value = withRepeat(withTiming(1.2, { duration: 500 }), -1, true);
 
-    async function playAlarm() {
-      try {
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: false,
-          playsInSilentModeIOS: true,
-          shouldDuckAndroid: true,
-          playThroughEarpieceAndroid: false,
-          staysActiveInBackground: true,
-        });
-
-        // Load the alarm sound
-        const { sound: newSound } = await Audio.Sound.createAsync(
-          require('../../assets/alarm.mp3'),
-          { shouldPlay: true, isLooping: true, volume: 1.0 }
-        );
-        setSound(newSound);
-        await newSound.playAsync();
-      } catch (error) {
-        console.error('Error playing alarm sound:', error);
+    Sound.setCategory('Playback', true); // true = mixWithOthers off, plays over silent mode
+    // On Android, files in res/raw/ use null as the base path (not Sound.MAIN_BUNDLE)
+    const alarmSound = new Sound('alarm.mp3', null as any, (error) => {
+      if (error) {
+        console.error('Error loading alarm sound:', error);
+        return;
       }
-    }
-
-    playAlarm();
+      alarmSound.setNumberOfLoops(-1); // loop indefinitely
+      alarmSound.setVolume(1.0);
+      alarmSound.play((success) => {
+        if (!success) console.error('Alarm sound playback failed');
+      });
+      setSound(alarmSound);
+    });
 
     return () => {
-      if (sound) {
-        sound.unloadAsync();
-      }
+      alarmSound.stop();
+      alarmSound.release();
     };
   }, []);
 
   const handleStop = async () => {
     if (sound) {
-      await sound.stopAsync();
-      await sound.unloadAsync();
+      sound.stop();
+      sound.release();
     }
     // Cancel any active notifications
     await notifee.cancelAllNotifications();

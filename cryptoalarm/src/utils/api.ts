@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// IMPORTANT: For Android Emulator, use 10.0.2.2. For Physical Device, use your machine's local IP (e.g., 192.168.1.x)
-const BASE_URL = 'http://localhost:3000/api'; 
+const BASE_URL = 'https://cryptoalarm-server.mazdi.dev/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -24,6 +23,16 @@ export const deleteAlarm = async (id: number) => {
 
 export const getSymbols = async () => {
   const response = await api.get('/symbols');
+  return response.data;
+};
+
+export const getNotice = async (): Promise<{ text: string | null }> => {
+  const response = await api.get('/notice');
+  return response.data;
+};
+
+export const registerDevice = async (userId: string, deviceToken: string) => {
+  const response = await api.post('/register', { userId, deviceToken });
   return response.data;
 };
 
