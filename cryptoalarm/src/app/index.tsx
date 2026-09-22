@@ -183,7 +183,10 @@ export default function Home() {
         if (remoteMessage.data?.type === 'alarm') {
           router.push({
             pathname: '/alarm',
-            params: { symbol: String(remoteMessage.data?.symbol || '') },
+            params: {
+              symbol: String(remoteMessage.data?.symbol || ''),
+              message: String(remoteMessage.data?.body || ''),
+            },
           });
           return;
         }

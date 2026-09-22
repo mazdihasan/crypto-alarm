@@ -1,6 +1,18 @@
 import axios from 'axios';
+import { Platform } from 'react-native';
 
-const BASE_URL = 'https://cryptoalarm-server.mazdi.dev/api';
+// ─── Environment Switcher ─────────────────────────────────────────────────────
+// Change to `true` to use Local Emulator, or `false` to use Live Server
+const IS_LOCAL = false;
+
+// Android Emulator accesses your PC localhost via 10.0.2.2, iOS uses localhost
+const LOCAL_URL = Platform.OS === 'android'
+  ? 'http://10.0.2.2:3000/api'
+  : 'http://localhost:3000/api';
+
+const PROD_URL = 'https://cryptoalarm-server.mazdi.dev/api';
+
+export const BASE_URL = IS_LOCAL ? LOCAL_URL : PROD_URL;
 
 const api = axios.create({
   baseURL: BASE_URL,

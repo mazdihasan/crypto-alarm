@@ -68,24 +68,40 @@ curl https://cryptoalarm-server.mazdi.dev/api/notice
 
 ## 4. Broadcast Push Notification to ALL Devices
 
-Sends a high-priority push notification to all registered devices using Firebase Cloud Messaging (FCM).
+Sends a push notification to all registered devices using Firebase Cloud Messaging (FCM).
+
+You can send either a **Normal Announcement** or an **Emergency Alarm** that sounds the alarm like a clock:
 
 - **URL:** `POST https://cryptoalarm-server.mazdi.dev/api/broadcast`
 - **Headers:** `Content-Type: application/json`
-- **Body:**
-```json
-{
-  "title": "Crypto Market Alert 🚀",
-  "body": "Major volatility detected across BTC and ETH. Check your alarms!",
-  "secret": "changeme_use_a_secure_password_here"
-}
-```
 
-### Example (cURL):
+### Mode A: Emergency Alarm Broadcast (`"playAlarm": true`)
+> Plays the **continuous loud alarm sound**, vibrates the phone, wakes the screen, and displays the flashing alarm screen over the lockscreen until stopped!
+
 ```bash
 curl -X POST https://cryptoalarm-server.mazdi.dev/api/broadcast \
   -H "Content-Type: application/json" \
-  -d "{\"title\": \"Crypto Market Alert 🚀\", \"body\": \"Major volatility detected!\", \"secret\": \"changeme_use_a_secure_password_here\"}"
+  -d '{
+    "title": "EMERGENCY MARKET ALERT 🚨",
+    "body": "Bitcoin dropped 15% in minutes! Check your positions immediately.",
+    "playAlarm": true,
+    "symbol": "BTC FLASH CRASH",
+    "secret": "changeme_use_a_secure_password_here"
+  }'
+```
+
+### Mode B: Normal Announcement Broadcast (`"playAlarm": false` or omitted)
+> Displays a standard notification banner with the standard notification chime.
+
+```bash
+curl -X POST https://cryptoalarm-server.mazdi.dev/api/broadcast \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Crypto Market Update 📊",
+    "body": "Daily market recap is now live in the app.",
+    "playAlarm": false,
+    "secret": "changeme_use_a_secure_password_here"
+  }'
 ```
 
 **Response:**
@@ -93,7 +109,41 @@ curl -X POST https://cryptoalarm-server.mazdi.dev/api/broadcast \
 {
   "sent": 15,
   "failed": 0,
-  "totalDevices": 15
+  "totalDevices": 15,
+  "prunedTokens": 0,
+  "alarmTriggered": true
 }
 ```
 *(Dead or uninstalled tokens are automatically pruned from the database).*
+
+---
+
+## 5. View Server & System Stats (Admin)
+
+Checks active alarms, registered devices, current notice, and tracked symbols.
+
+- **URL:** `POST https://cryptoalarm-server.mazdi.dev/api/stats`
+- **Headers:** `Content-Type: application/json`
+- **Body:**
+```json
+{
+  "secret": "changeme_use_a_secure_password_here"
+}
+```
+
+### Example (cURL):
+```bash
+curl -X POST https://cryptoalarm-server.mazdi.dev/api/stats \
+  -H "Content-Type: application/json" \
+  -d "{\"secret\": \"changeme_use_a_secure_password_here\"}"
+```
+
+**Response:**
+```json
+{
+  "activeAlarms": 8,
+  "registeredDevices": 24,
+  "activeNotice": "Join our official Telegram Group!",
+  "supportedSymbols": ["BTCUSDT", "XAUTUSDT", "ETHUSDT", "BNBUSDT"]
+}
+```

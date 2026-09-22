@@ -39,7 +39,13 @@ export default function Layout() {
       if (initialNotification) {
         if (initialNotification.notification.data?.symbol && initialNotification.notification.data?.type !== 'broadcast') {
           setTimeout(() => {
-            router.push({ pathname: '/alarm', params: { symbol: initialNotification.notification.data?.symbol as string } });
+            router.push({
+              pathname: '/alarm',
+              params: {
+                symbol: initialNotification.notification.data?.symbol as string,
+                message: (initialNotification.notification.data?.body || '') as string,
+              },
+            });
           }, 100);
         }
       }
@@ -50,7 +56,13 @@ export default function Layout() {
     const unsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
       if (type === EventType.PRESS) {
         if (detail.notification?.data?.symbol && detail.notification?.data?.type !== 'broadcast') {
-          router.push({ pathname: '/alarm', params: { symbol: detail.notification?.data?.symbol as string } });
+          router.push({
+            pathname: '/alarm',
+            params: {
+              symbol: detail.notification?.data?.symbol as string,
+              message: (detail.notification?.data?.body || '') as string,
+            },
+          });
         }
       }
     });

@@ -10,7 +10,7 @@ const { width } = Dimensions.get('window');
 
 export default function AlarmScreen() {
   const router = useRouter();
-  const { symbol } = useLocalSearchParams();
+  const { symbol, message } = useLocalSearchParams();
   const [sound, setSound] = useState<Sound | null>(null);
   const pulseAnim = useSharedValue(1);
 
@@ -63,7 +63,13 @@ export default function AlarmScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>ALARM TRIGGERED!</Text>
-      <Text style={styles.subtitle}>{symbol ? `${symbol} reached target!` : 'Target price reached!'}</Text>
+      <Text style={styles.subtitle} numberOfLines={3}>
+        {message
+          ? String(message)
+          : symbol
+          ? `${symbol} reached target!`
+          : 'Target price reached!'}
+      </Text>
       
       <Animated.View style={[styles.circle, animatedStyle]}>
         <Text style={styles.icon}>🚨</Text>

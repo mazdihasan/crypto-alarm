@@ -9,7 +9,7 @@
 Run this from inside the `android/` folder. **Save the keystore file and passwords somewhere safe** — you'll need them for every future release.
 
 ```powershell
-cd E:\my-own-projects\crypto-alarm\cryptoalarm\android
+cd E:\my-own-projects\crypto-alarm\cryptoalarm\android\app
 
 keytool -genkeypair -v `
   -keystore release.keystore `
