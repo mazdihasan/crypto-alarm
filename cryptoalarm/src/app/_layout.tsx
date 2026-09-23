@@ -37,13 +37,14 @@ export default function Layout() {
     async function checkInitialNotification() {
       const initialNotification = await notifee.getInitialNotification();
       if (initialNotification) {
-        if (initialNotification.notification.data?.symbol && initialNotification.notification.data?.type !== 'broadcast') {
+        const data = initialNotification.notification.data;
+        if (data?.type === 'alarm' || (data?.symbol && data?.type !== 'broadcast')) {
           setTimeout(() => {
             router.push({
               pathname: '/alarm',
               params: {
-                symbol: initialNotification.notification.data?.symbol as string,
-                message: (initialNotification.notification.data?.body || '') as string,
+                symbol: (data?.symbol || '') as string,
+                message: (data?.body || '') as string,
               },
             });
           }, 100);
@@ -54,13 +55,14 @@ export default function Layout() {
 
     // Listen to foreground events (e.g. user tapped the notification while app was in foreground/background)
     const unsubscribe = notifee.onForegroundEvent(({ type, detail }) => {
-      if (type === EventType.PRESS) {
-        if (detail.notification?.data?.symbol && detail.notification?.data?.type !== 'broadcast') {
+      if (type === EventType.PRESS || type === EventType.ACTION_PRESS) {
+        const data = detail.notification?.data;
+        if (data?.type === 'alarm' || (data?.symbol && data?.type !== 'broadcast')) {
           router.push({
             pathname: '/alarm',
             params: {
-              symbol: detail.notification?.data?.symbol as string,
-              message: (detail.notification?.data?.body || '') as string,
+              symbol: (data?.symbol || '') as string,
+              message: (data?.body || '') as string,
             },
           });
         }

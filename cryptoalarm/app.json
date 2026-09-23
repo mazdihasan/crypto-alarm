@@ -19,7 +19,13 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "USE_FULL_SCREEN_INTENT",
+        "WAKE_LOCK",
+        "FOREGROUND_SERVICE",
+        "VIBRATE"
+      ]
     },
     "web": {
       "output": "static",

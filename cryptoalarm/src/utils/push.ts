@@ -6,16 +6,26 @@ import {
   AuthorizationStatus,
   registerDeviceForRemoteMessages
 } from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance, AndroidCategory } from '@notifee/react-native';
+import notifee, { AndroidImportance, AndroidCategory, AndroidVisibility } from '@notifee/react-native';
+
+export const ALARM_CHANNEL_ID = 'crypto_alarm_channel_v3';
+
+export async function createAlarmChannel() {
+  return await notifee.createChannel({
+    id: ALARM_CHANNEL_ID,
+    name: 'Crypto Alarm',
+    importance: AndroidImportance.HIGH,
+    sound: 'alarm',
+    vibration: true,
+    vibrationPattern: [300, 500],
+    bypassDnd: true,
+    visibility: AndroidVisibility.PUBLIC,
+  });
+}
 
 // Background handler for data-only messages to trigger full-screen intent
 export async function triggerAlarmNotification(message: any) {
-  const channelId = await notifee.createChannel({
-    id: 'crypto_alarm_channel',
-    name: 'Crypto Alarm',
-    importance: AndroidImportance.HIGH,
-    bypassDnd: true, // Bypasses Do Not Disturb
-  });
+  const channelId = await createAlarmChannel();
 
   await notifee.displayNotification({
     title: message.data?.title || 'Crypto Alarm',
@@ -25,6 +35,11 @@ export async function triggerAlarmNotification(message: any) {
       channelId,
       category: AndroidCategory.ALARM,
       importance: AndroidImportance.HIGH,
+      sound: 'alarm',
+      loopSound: true,
+      autoCancel: false,
+      ongoing: true,
+      visibility: AndroidVisibility.PUBLIC,
       fullScreenAction: {
         id: 'default',
       },
@@ -49,6 +64,9 @@ export async function requestUserPermission() {
 
       // Request Notifee permissions for alarms
       await notifee.requestPermission();
+
+      // Pre-create alarm channel so Android OS registers alarm sound ahead of time
+      await createAlarmChannel();
 
       return true;
     } else {

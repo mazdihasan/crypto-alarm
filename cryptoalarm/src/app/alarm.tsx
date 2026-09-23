@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Vibration } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, Vibration, Platform, NativeModules } from 'react-native';
 import Sound from 'react-native-sound';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import notifee from '@notifee/react-native';
 import Animated, { withRepeat, withTiming, useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
+const { AlarmModule } = NativeModules;
 const { width } = Dimensions.get('window');
 
 export default function AlarmScreen() {
@@ -21,36 +22,48 @@ export default function AlarmScreen() {
     // Vibrate phone continuously like an alarm clock: vibrate 800ms, pause 400ms
     Vibration.vibrate([800, 400], true);
 
-    Sound.setCategory('Playback', true); // true = mixWithOthers off, plays over silent mode
-    // On Android, files in res/raw/ use null as the base path (not Sound.MAIN_BUNDLE)
-    const alarmSound = new Sound('alarm.mp3', null as any, (error) => {
-      if (error) {
-        console.error('Error loading alarm sound:', error);
-        return;
-      }
-      alarmSound.setNumberOfLoops(-1); // loop indefinitely like a real clock alarm
-      alarmSound.setVolume(1.0);
-      alarmSound.play((success) => {
-        if (!success) console.error('Alarm sound playback failed');
+    // Play native alarm audio with USAGE_ALARM (unrestricted on lock screen)
+    if (Platform.OS === 'android' && AlarmModule?.startAlarm) {
+      AlarmModule.startAlarm();
+    } else {
+      Sound.setCategory('Alarm', true);
+      const alarmSound = new Sound('alarm.mp3', '', (error) => {
+        if (error) {
+          console.error('Error loading alarm sound:', error);
+          return;
+        }
+        alarmSound.setNumberOfLoops(-1); // loop indefinitely like a real clock alarm
+        alarmSound.setVolume(1.0);
+        alarmSound.play((success) => {
+          if (!success) console.error('Alarm sound playback failed');
+        });
+        setSound(alarmSound);
       });
-      setSound(alarmSound);
-    });
+    }
 
     return () => {
       Vibration.cancel();
-      alarmSound.stop();
-      alarmSound.release();
+      if (Platform.OS === 'android' && AlarmModule?.stopAlarm) {
+        AlarmModule.stopAlarm();
+      }
+      if (sound) {
+        sound.stop();
+        sound.release();
+      }
     };
   }, []);
 
   const handleStop = async () => {
     Vibration.cancel();
+    if (Platform.OS === 'android' && AlarmModule?.stopAlarm) {
+      AlarmModule.stopAlarm();
+    }
     if (sound) {
       sound.stop();
       sound.release();
     }
     // Cancel any active notifications
-    await notifee.cancelAllNotifications();
+    await notifee.cancelAllNotifications().catch(() => {});
     router.replace('/');
   };
 

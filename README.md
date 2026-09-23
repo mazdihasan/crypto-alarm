@@ -89,3 +89,10 @@ The mobile application is built with Expo and React Native.
      ```bash
      npm run ios
      ```
+
+---
+
+## 3. Production APK & Device Setup
+
+- 📦 **Building Release APK**: See [cryptoalarm/build-apk.md](cryptoalarm/build-apk.md)
+- 📱 **Installing APK & Permissions Guide**: See [cryptoalarm/INSTALL_INSTRUCTIONS.md](cryptoalarm/INSTALL_INSTRUCTIONS.md) (covers ADB/sideload, Xiaomi MIUI/HyperOS, Samsung, Pixel, and lock screen settings)
